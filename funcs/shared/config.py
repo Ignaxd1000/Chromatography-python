@@ -7,7 +7,6 @@ def loadConfig() -> appConfig:
 
     return appConfig(
         dbPath=data["dbPath"],
-        workDirectory=data["workDirectory"]
     )
 
 config = loadConfig()

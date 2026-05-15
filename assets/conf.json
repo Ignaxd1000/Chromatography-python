@@ -1,4 +1,3 @@
 {
-    "dbPath":"chromatography.db",
-    "workDirectory":"~/Games/wotlk"
+    "dbPath":"cases/chromatography.db"
 }

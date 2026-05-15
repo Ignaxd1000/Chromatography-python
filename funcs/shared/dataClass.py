@@ -5,7 +5,6 @@ from pathlib import Path
 @dataclass
 class appConfig:
     dbPath: str
-    workDirectory: str
 
 @dataclass
 class fileEntry:
