@@ -39,7 +39,8 @@ conn.commit()
 
 conn.commit()
 
-def saveFileToDb(entry: fileEntry):
+def saveFileToDb(entry: fileEntry, sessionId: int):
+
     cursor.execute("""
     INSERT INTO files(
         filePath,
@@ -47,22 +48,23 @@ def saveFileToDb(entry: fileEntry):
         size,
         createdAt,
         modifiedAt,
-        scanTime,
         sha256,
-        isDeleted
+        isDeleted,
+        sessionId
     )
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         str(entry.filePath),
         entry.extension,
         entry.size,
         entry.createdAt.isoformat(),
         entry.modifiedAt.isoformat(),
-        entry.sha256
+        entry.sha256,
+        0,
+        sessionId
     ))
 
     conn.commit()
-
 def createScanSession(scanTime: str, rootPath: str):
 
     cursor.execute("""
