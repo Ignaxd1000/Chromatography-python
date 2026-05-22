@@ -13,6 +13,6 @@ class fileEntry:
     size: int
     createdAt: datetime
     modifiedAt: datetime
-    sha256: str | None
-    scanTime: str
-    isDeleted: bool
+    scanTime: datetime
+    sha256: str | None = None
+
