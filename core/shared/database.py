@@ -1,7 +1,7 @@
 import sqlite3
 from dataClass import fileEntry
 
-class database(self, dbPath):
+class database:
     def __init__(self, dbPath):
         self.conn = sqlite3.connect(dbPath)
         self.cursor = self.conn.cursor()
