@@ -1,8 +1,7 @@
-from database import cursor, conn
 from dataClass import fileEntry
 
 
-def saveFileToDb(entry: fileEntry, sessionId: int):
+def saveFileToDb(entry: fileEntry, sessionId: int, cursor, conn):
 
     cursor.execute("""
     INSERT INTO files(
@@ -11,35 +10,17 @@ def saveFileToDb(entry: fileEntry, sessionId: int):
         size,
         createdAt,
         modifiedAt,
-        sha256,
-        sessionId
+        sha256
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         str(entry.filePath),
         entry.extension,
         entry.size,
         entry.createdAt.isoformat(),
         entry.modifiedAt.isoformat(),
-        entry.sha256,
-        sessionId
+        entry.sha256
     ))
 
     conn.commit()
-    
-def createScanSession(scanTime: str, rootPath: str):
-
-    cursor.execute("""
-    INSERT INTO scanSessions(
-        scanTime,
-        rootPath
-    )
-    VALUES (?, ?)
-    """, (
-        scanTime,
-        rootPath
-    ))
-
-    conn.commit()
-
-    return cursor.lastrowid
+    return("File saved succesfully papu")

@@ -1,36 +1,32 @@
 import sqlite3
-from shared.config import config
 from dataClass import fileEntry
-conn = sqlite3.connect("config.dbPath")
-cursor = conn.cursor()
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS scanSessions (
-    id INTEGER PRIMARY KEY,
+class database(self, dbPath):
+    def __init__(self, dbPath):
+        self.conn = sqlite3.connect(dbPath)
+        self.cursor = self.conn.cursor()
 
-    scanTime TEXT,
-    rootPath TEXT
-)
-""")
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS files (
+            id INTEGER PRIMARY KEY,
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS files (
-    id INTEGER PRIMARY KEY,
+            filePath TEXT,
+            extension TEXT,
+            size INTEGER,
 
-    filePath TEXT,
-    extension TEXT,
-    size INTEGER,
+            createdAt TEXT,
+            modifiedAt TEXT,
 
-    createdAt TEXT,
-    modifiedAt TEXT,
+            sha256 TEXT,
+            isDeleted INTEGER DEFAULT 0,
+            sessionId INTEGER,
 
-    sha256 TEXT,
-    isDeleted INTEGET DEFAULT 0,
-    sessionId INTEGER,
+        )
+        """)
 
-    FOREIGN KEY(sessionId)
-        REFERENCES scanSessions(id)
-)
-""")
+        self.conn.commit()
 
-conn.commit()
+    def closeDatabase(self):
+        self.conn.close()
+        return("Database session succesfully closed:")
+        
