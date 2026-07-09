@@ -25,11 +25,11 @@ class database:
 
         self.conn.commit()
 
-    def closeDatabase(self):
+    def close(self):
         self.conn.close()
         return("Database session succesfully closed:")
         
-    def saveFileToDb(self, entry: fileEntry):
+    def saveFile(self, entry: fileEntry):
 
         self.cursor.execute("""
         INSERT INTO files(

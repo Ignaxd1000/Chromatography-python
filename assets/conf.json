@@ -1,3 +1,4 @@
 {
-    "dbPath":"cases/chromatography.db"
+    "dbPath":"cases/chromatography.db",
+    "scanDir":""
 }
