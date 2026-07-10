@@ -1,5 +1,8 @@
 import sqlite3
 from dataClass import fileEntry
+from datetime import *
+from pathlib import Path
+
 
 class database:
     def __init__(self, dbPath):
@@ -52,7 +55,7 @@ class database:
 
         self.conn.commit()
 
-    def getAllFiles(self) -> list[FileEntry]:
+    def getAllFiles(self) -> list[fileEntry]:
 
         self.cursor.execute("""
             SELECT
@@ -71,12 +74,13 @@ class database:
 
         for row in rows:
             files.append(
-                FileEntry(
+                fileEntry(
                     filePath=Path(row[0]),
                     extension=row[1],
                     size=row[2],
                     createdAt=datetime.fromisoformat(row[3]),
                     modifiedAt=datetime.fromisoformat(row[4]),
+                    scanTime=datetime.fromisoformat(row[5]),
                     sha256=row[5]
                 )
             )

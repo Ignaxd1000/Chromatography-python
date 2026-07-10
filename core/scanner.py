@@ -3,8 +3,9 @@ from datetime import datetime
 from pathlib import Path
 
 
-def scanDirectory(rootPath: Path) -> list[fileEntry]:
+def scanDirectory(rootPath) -> list[fileEntry]:
 
+    rootPath = Path(rootPath)
     entries = []
 
     for file in rootPath.rglob("*"):
