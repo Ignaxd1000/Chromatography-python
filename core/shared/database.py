@@ -13,7 +13,7 @@ class database:
         CREATE TABLE IF NOT EXISTS files (
             id INTEGER PRIMARY KEY,
 
-            filePath TEXT,
+            filePath TEXT UNIQUE,
             extension TEXT,
             size INTEGER,
 
@@ -21,7 +21,6 @@ class database:
             modifiedAt TEXT,
 
             sha256 TEXT,
-            isDeleted INTEGER DEFAULT 0,
 
         )
         """)
@@ -30,12 +29,12 @@ class database:
 
     def __close(self):
         self.conn.close()
-        return("Database session succesfully closed:")
         
-    def __saveFile(self, entry: fileEntry):
+    def __saveFile(self, entry: fileEntry):     # Se me ocurrio hacerlo todo en uno para simplificar el código, pero tengo dudas
+                                                # de lo rompebolas que puede ser en terminar de rendimiento, O(logn(x)) momento
 
         self.cursor.execute("""
-        INSERT INTO files(
+        INSERT INTO files (
             filePath,
             extension,
             size,
@@ -44,6 +43,12 @@ class database:
             sha256
         )
         VALUES (?, ?, ?, ?, ?, ?)
+
+        ON CONFLICT(filePath)
+        DO UPDATE SET
+            size = excluded.size,
+            modifiedAt = excluded.modifiedAt,
+            sha256 = excluded.sha256
         """, (
             str(entry.filePath),
             entry.extension,
@@ -54,6 +59,7 @@ class database:
         ))
 
         self.conn.commit()
+
 
     def __getAllFiles(self) -> list[fileEntry]:
 
