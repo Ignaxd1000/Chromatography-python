@@ -1,7 +1,7 @@
 from shared.database import database
 from shared.config import Config
 from scanner import scanDirectory
-from hasher import *
+from hasher import hashFiles
 from shared.dataClass import *
 from shared.exceptions import *
 
@@ -13,7 +13,13 @@ class runner:
         self.database = database(self.config.args.dbPath)
         self.entries = []
 
+    def save(self):
+        if not self.entries:
+            raise Exception("No hay entradas para guardar")
+        for entry in self.entries:
+            self.database.saveFile(entry)
 
+            
     def scan(self):
         if self.config.args.isScanCompleted:
             raise scanAlreadyCompleted()
@@ -22,26 +28,24 @@ class runner:
         try:
             self.entries = scanDirectory(self.config.args.scanDir)
             self.save()
+            self.config.setScanCompleted()
         except Exception as e:
             print(f"Ocurrió un problemin. {e}")
 
 
+    def sync(self):
+        self.entries = self.database.getAllFiles()
+
+
     def hash(self):
-        if self.entries.count == 0:
+        self.sync()
+        if not self.entries:
             raise Exception("No hay entradas para hashear")
+        
         hashFiles(self.entries)
         try:
             self.save()
         except Exception as e:
             print(f"Ocurrió un problemin. {e}")
 
-    def sync(self):
-        print()
-
-
-    def save(self):
-        if self.entries.count == 0:
-            raise Exception("No hay entradas para guardar")
-        for entry in self.entries:
-            self.database.__saveFile(entry)
         

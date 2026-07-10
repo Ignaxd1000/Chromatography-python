@@ -27,10 +27,10 @@ class database:
 
         self.conn.commit()
 
-    def __close(self):
+    def close(self):
         self.conn.close()
         
-    def __saveFile(self, entry: fileEntry):     # Se me ocurrio hacerlo todo en uno para simplificar el código, pero tengo dudas
+    def saveFile(self, entry: fileEntry):     # Se me ocurrio hacerlo todo en uno para simplificar el código, pero tengo dudas
                                                 # de lo rompebolas que puede ser en terminar de rendimiento, O(logn(x)) momento
 
         self.cursor.execute("""
@@ -61,7 +61,7 @@ class database:
         self.conn.commit()
 
 
-    def __getAllFiles(self) -> list[fileEntry]:
+    def getAllFiles(self) -> list[fileEntry]:
 
         self.cursor.execute("""
             SELECT
