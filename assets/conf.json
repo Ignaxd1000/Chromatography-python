@@ -1,4 +1,5 @@
 {
     "dbPath":"cases/chromatography.db",
-    "scanDir":""
+    "scanDir":"",
+    "isScanCompleted":false
 }

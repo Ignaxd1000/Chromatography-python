@@ -23,4 +23,4 @@ class runner:
         hashFiles(self.entries)
 
     def sync(self):
-        
+        print()

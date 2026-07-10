@@ -22,7 +22,8 @@ class Config:
 
         return appConfig(
             dbPath=data["dbPath"],
-            scanDir=data["scanDir"]
+            scanDir=data["scanDir"],
+            isScanCompleted=data["isScanCompleted"]
         )
 
     def edit(self, cfg: appConfig) -> None:
@@ -31,7 +32,8 @@ class Config:
             json.dump(
                 {
                     "dbPath": cfg.dbPath,
-                    "scanDir": cfg.scanDir
+                    "scanDir": cfg.scanDir,
+                    "isScanCompleted":cfg.isScanCompleted
                 },
                 f,
                 indent=4,
@@ -44,7 +46,8 @@ class Config:
 
         cfg = appConfig(
             dbPath="",
-            scanDir=""
+            scanDir="",
+            isScanCompleted=False
         )
 
         self.edit(cfg)

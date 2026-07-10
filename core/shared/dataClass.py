@@ -6,6 +6,7 @@ from pathlib import Path
 class appConfig:
     dbPath: str
     scanDir: str
+    isScanCompleted: bool
 
 @dataclass
 class fileEntry:
