@@ -15,6 +15,5 @@ class fileEntry:
     size: int
     createdAt: datetime
     modifiedAt: datetime
-    scanTime: datetime
     sha256: str | None = None
 

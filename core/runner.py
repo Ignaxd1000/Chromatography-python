@@ -18,8 +18,10 @@ class runner:
             raise Exception("No hay entradas para guardar")
         for entry in self.entries:
             self.database.saveFile(entry)
+        self.database.conn.commit()     # Ya sé que esto deberia ir en el database.py, pero si lo pongo ahí hago un commit
+                                        # por cada iteración del for, no hace falta que explique más supongo.
 
-            
+
     def scan(self):
         if self.config.args.isScanCompleted:
             raise scanAlreadyCompleted()

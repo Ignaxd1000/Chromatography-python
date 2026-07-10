@@ -1,6 +1,6 @@
 import sqlite3
 from dataClass import fileEntry
-from datetime import *
+from datetime import datetime
 from pathlib import Path
 
 
@@ -20,7 +20,7 @@ class database:
             createdAt TEXT,
             modifiedAt TEXT,
 
-            sha256 TEXT,
+            sha256 TEXT
 
         )
         """)
@@ -58,8 +58,6 @@ class database:
             entry.sha256
         ))
 
-        self.conn.commit()
-
 
     def getAllFiles(self) -> list[fileEntry]:
 
@@ -86,7 +84,6 @@ class database:
                     size=row[2],
                     createdAt=datetime.fromisoformat(row[3]),
                     modifiedAt=datetime.fromisoformat(row[4]),
-                    scanTime=datetime.fromisoformat(row[5]),
                     sha256=row[5]
                 )
             )

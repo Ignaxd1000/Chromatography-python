@@ -20,7 +20,6 @@ def scanDirectory(rootPath) -> list[fileEntry]:
             extension=file.suffix,
             size=stats.st_size,
 
-            scanTime=datetime.now(),
 
             createdAt=datetime.fromtimestamp(
                 stats.st_ctime
