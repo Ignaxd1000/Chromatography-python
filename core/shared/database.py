@@ -28,11 +28,11 @@ class database:
 
         self.conn.commit()
 
-    def close(self):
+    def __close(self):
         self.conn.close()
         return("Database session succesfully closed:")
         
-    def saveFile(self, entry: fileEntry):
+    def __saveFile(self, entry: fileEntry):
 
         self.cursor.execute("""
         INSERT INTO files(
@@ -55,7 +55,7 @@ class database:
 
         self.conn.commit()
 
-    def getAllFiles(self) -> list[fileEntry]:
+    def __getAllFiles(self) -> list[fileEntry]:
 
         self.cursor.execute("""
             SELECT

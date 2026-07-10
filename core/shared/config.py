@@ -11,9 +11,9 @@ class Config:
     def __init__(self):
 
         if self.CONFIG_PATH.exists():
-            self.cfg = self.load()
+            self.args = self.load()
         else:
-            self.cfg = self.createDefault()
+            self.args = self.createDefault()
 
     def load(self) -> appConfig:
 
@@ -40,12 +40,12 @@ class Config:
                 ensure_ascii=False
             )
 
-        self.cfg = cfg
+        self.args = cfg
 
     def createDefault(self) -> appConfig:
 
         cfg = appConfig(
-            dbPath="",
+            dbPath="cases/chromatography.db",
             scanDir="",
             isScanCompleted=False
         )
@@ -53,3 +53,11 @@ class Config:
         self.edit(cfg)
 
         return cfg
+    
+    def setScanCompleted(self):
+        self.args.isScanCompleted = True
+        self.edit(self.args)
+
+    def setScanPending(self):
+        self.args.isScanCompleted = False
+        self.edit(self.args)

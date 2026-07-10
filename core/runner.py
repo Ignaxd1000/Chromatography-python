@@ -8,14 +8,14 @@ class runner:
 
     def __init__(self):
         self.config = Config()
-        self.db = database(self.config.cfg.dbPath)
+        self.database = database(self.config.args.dbPath)
         self.entries = []
 
     def scan(self):
         try:
-            self.entries = scanDirectory(self.config.cfg.scanDir)
-        except:
-            print("Ocurrió un problemin")
+            self.entries = scanDirectory(self.config.args.scanDir)
+        except Exception as e:
+            print(f"Ocurrió un problemin. {e}")
 
     def hash(self):
         if self.entries.count == 0:
@@ -24,3 +24,10 @@ class runner:
 
     def sync(self):
         print()
+
+    def save(self):
+        if self.entries.count == 0:
+            raise Exception("No hay entradas para guardar")
+        for entry in self.entries:
+            self.database.__saveFile(entry)
+        
