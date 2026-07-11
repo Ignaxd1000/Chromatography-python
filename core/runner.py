@@ -1,53 +1,50 @@
-from shared.database import database
-from shared.config import Config
-from scanner import scanDirectory
-from hasher import hashFiles
-from shared.dataClass import *
-from shared.exceptions import *
+from adapters import ConfigAdapter, DatabaseRepositoryAdapter, HasherAdapter, ScannerAdapter
+from shared.exceptions import scanAlreadyCompleted
+from services import FileProcessingService, NoEntriesError, ScanAlreadyCompletedError
 
 
 class runner:
 
     def __init__(self):
-        self.config = Config()
-        self.database = database(self.config.args.dbPath)
+        self.config_adapter = ConfigAdapter()
+        config = self.config_adapter.get()
+        self.database_adapter = DatabaseRepositoryAdapter(config.dbPath)
+        self.service = FileProcessingService(
+            scanner=ScannerAdapter(),
+            hasher=HasherAdapter(),
+            repository=self.database_adapter,
+            config=self.config_adapter,
+        )
         self.entries = []
-
-    def save(self):
-        if not self.entries:
-            raise Exception("No hay entradas para guardar")
-        for entry in self.entries:
-            self.database.saveFile(entry)
-        self.database.conn.commit()     # Ya sé que esto deberia ir en el database.py, pero si lo pongo ahí hago un commit
-                                        # por cada iteración del for, no hace falta que explique más supongo.
 
 
     def scan(self):
-        if self.config.args.isScanCompleted:
+        result = self.service.scan()
+        if result.ok:
+            self.entries = result.value or []
+            return
+
+        if isinstance(result.error, ScanAlreadyCompletedError):
             raise scanAlreadyCompleted()
-        
-        self.config.setScanPending()
-        try:
-            self.entries = scanDirectory(self.config.args.scanDir)
-            self.save()
-            self.config.setScanCompleted()
-        except Exception as e:
-            print(f"Ocurrió un problemin. {e}")
+        print(f"Ocurrió un problemin. {result.error}")
 
 
     def sync(self):
-        self.entries = self.database.getAllFiles()
+        result = self.service.sync()
+        if result.ok:
+            self.entries = result.value or []
+            return
+        print(f"Ocurrió un problemin. {result.error}")
 
 
     def hash(self):
-        self.sync()
-        if not self.entries:
+        result = self.service.hash()
+        if result.ok:
+            self.entries = result.value or []
+            return
+
+        if isinstance(result.error, NoEntriesError):
             raise Exception("No hay entradas para hashear")
-        
-        hashFiles(self.entries)
-        try:
-            self.save()
-        except Exception as e:
-            print(f"Ocurrió un problemin. {e}")
+        print(f"Ocurrió un problemin. {result.error}")
 
         

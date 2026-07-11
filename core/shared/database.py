@@ -1,5 +1,5 @@
 import sqlite3
-from dataClass import fileEntry
+from shared.dataClass import fileEntry
 from datetime import datetime
 from pathlib import Path
 

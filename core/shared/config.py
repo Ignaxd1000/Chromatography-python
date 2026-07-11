@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from dataClass import appConfig
+from shared.dataClass import appConfig
 
 
 class Config:
