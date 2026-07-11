@@ -13,41 +13,54 @@ class runner:
         self.database = database(self.config.args.dbPath)
         self.entries = []
 
+
     def save(self):
         if not self.entries:
-            raise Exception("No hay entradas para guardar")
-        for entry in self.entries:
-            self.database.saveFile(entry)
-        self.database.conn.commit()     # Ya sé que esto deberia ir en el database.py, pero si lo pongo ahí hago un commit
-                                        # por cada iteración del for, no hace falta que explique más supongo.
+            raise noEntryException()
+        self.database.upsertFile(self.entries)
 
 
     def scan(self):
         if self.config.args.isScanCompleted:
             raise scanAlreadyCompleted()
         
-        self.config.setScanPending()
+
         try:
             self.entries = scanDirectory(self.config.args.scanDir)
             self.save()
             self.config.setScanCompleted()
         except Exception as e:
-            print(f"Ocurrió un problemin. {e}")
+            raise e
 
 
-    def sync(self):
+    def loadDatabaseEntries(self):
         self.entries = self.database.getAllFiles()
 
 
     def hash(self):
-        self.sync()
-        if not self.entries:
-            raise Exception("No hay entradas para hashear")
+        entries = self.database.getFilesWithoutHash()
+        if not entries:
+            raise noEntryException()
         
-        hashFiles(self.entries)
+        hashFiles(entries)
         try:
-            self.save()
+            for entry in entries:
+                self.database.upsertFile(entry)
         except Exception as e:
-            print(f"Ocurrió un problemin. {e}")
+            raise e
 
+
+    def editConfig(self, databasePath, scanDirectory, scanState):
+        try:
+            self.config.edit(appConfig(
+                dbPath=databasePath,
+                scanDir=scanDirectory,
+                isScanCompleted=scanState
+            ))
+        except Exception as e:
+            raise e
         
+
+    def resetCase(self):
+        self.database.nukeAll()
+        self.config.setScanPending()

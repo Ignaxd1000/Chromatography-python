@@ -27,36 +27,40 @@ class database:
 
         self.conn.commit()
 
+
     def close(self):
         self.conn.close()
         
-    def saveFile(self, entry: fileEntry):     # Se me ocurrio hacerlo todo en uno para simplificar el código, pero tengo dudas
-                                                # de lo rompebolas que puede ser en terminar de rendimiento, O(logn(x)) momento
 
-        self.cursor.execute("""
-        INSERT INTO files (
-            filePath,
-            extension,
-            size,
-            createdAt,
-            modifiedAt,
-            sha256
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
+    def upsertFile(self, entries):     # Se me ocurrio hacerlo todo en uno para simplificar el código, pero tengo dudas
+        for entry in entries:                                        # de lo rompebolas que puede ser en terminar de rendimiento, O(logn(x)) momento
 
-        ON CONFLICT(filePath)
-        DO UPDATE SET
-            size = excluded.size,
-            modifiedAt = excluded.modifiedAt,
-            sha256 = excluded.sha256
-        """, (
-            str(entry.filePath),
-            entry.extension,
-            entry.size,
-            entry.createdAt.isoformat(),
-            entry.modifiedAt.isoformat(),
-            entry.sha256
-        ))
+            self.cursor.execute("""
+            INSERT INTO files (
+                filePath,
+                extension,
+                size,
+                createdAt,
+                modifiedAt,
+                sha256
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+
+            ON CONFLICT(filePath)
+            DO UPDATE SET
+                size = excluded.size,
+                modifiedAt = excluded.modifiedAt,
+                sha256 = excluded.sha256
+            """, (
+                str(entry.filePath),
+                entry.extension,
+                entry.size,
+                entry.createdAt.isoformat(),
+                entry.modifiedAt.isoformat(),
+                entry.sha256
+            ))
+
+        self.conn.commit()
 
 
     def getAllFiles(self) -> list[fileEntry]:
@@ -89,3 +93,42 @@ class database:
             )
 
         return files
+    
+
+    def nukeAll(self):
+        self.cursor.execute("""
+            DELETE FROM files
+        """)
+
+    def getFilesWithoutHash(self) -> list[fileEntry]:
+
+        self.cursor.execute("""
+            SELECT
+                filePath,
+                extension,
+                size,
+                createdAt,
+                modifiedAt,
+                sha256
+            FROM files
+            WHERE sha256 IS NULL
+        """)
+
+        rows = self.cursor.fetchall()
+
+        entries = []
+
+        for row in rows:
+
+            entries.append(
+                fileEntry(
+                    filePath=Path(row[0]),
+                    extension=row[1],
+                    size=row[2],
+                    createdAt=datetime.fromisoformat(row[3]),
+                    modifiedAt=datetime.fromisoformat(row[4]),
+                    sha256=row[5]
+                )
+            )
+
+        return entries

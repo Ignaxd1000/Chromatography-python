@@ -17,3 +17,4 @@ def hashFiles(entries: list[fileEntry]):
 
     for entry in entries:
         calculateFileHash(entry)
+
