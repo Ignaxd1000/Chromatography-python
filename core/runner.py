@@ -1,4 +1,4 @@
-from shared.database import database
+from shared.database import Database
 from shared.config import Config
 from scanner import scanDirectory
 from hasher import hashFiles
@@ -6,11 +6,11 @@ from shared.dataClass import *
 from shared.exceptions import *
 
 
-class runner:
+class Runner:
 
     def __init__(self):
         self.config = Config()
-        self.database = database(self.config.args.dbPath)
+        self.database = Database(self.config.args.dbPath)
         self.entries = []
 
 

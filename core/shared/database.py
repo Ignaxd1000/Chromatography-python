@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-class database:
+class Database:
     def __init__(self, dbPath):
         self.conn = sqlite3.connect(dbPath)
         self.cursor = self.conn.cursor()
