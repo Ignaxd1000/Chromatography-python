@@ -4,11 +4,13 @@ from scanner import scanDirectory
 from hasher import hashFiles
 from shared.dataClass import *
 from shared.exceptions import *
-
+from shared.progress import taskProgress
 
 class Runner:
 
     def __init__(self):
+        self.hashProgress = taskProgress()
+        self.scanProgress = taskProgress()
         self.config = Config()
         self.database = Database(self.config.args.dbPath)
         self.entries = []
@@ -24,7 +26,7 @@ class Runner:
         if self.config.args.isScanCompleted:
             raise scanAlreadyCompleted()
         
-
+        
         try:
             self.entries = scanDirectory(self.config.args.scanDir)
             self.save()
@@ -42,7 +44,9 @@ class Runner:
         if not entries:
             raise noEntryException()
         
-        hashFiles(entries)
+        total= len(entries)
+        self.hashProgress.reset(total)
+        hashFiles(entries, self.hashProgress)
         try:
             for entry in entries:
                 self.database.upsertFile(entry)
