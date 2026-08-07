@@ -4,7 +4,8 @@ class taskProgress:
         self.steps = 0
 
     def step(self):
-        self.total += 1     # Podria poner una excepcion aca por si se pasa del 100% pero algo me dice que es al pedo
+        if self.steps != self.total:
+            self.steps += 1     
 
     def reset(self,total):
         self.total = total
