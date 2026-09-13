@@ -14,9 +14,16 @@ Fetch and print all stored records:
 chroma --fetch
 ```
 
+Hash all records that are missing `sha256`:
+
+```bash
+chroma --hash
+```
+
 Optional database override (useful for tests/headless workflows):
 
 ```bash
 chroma --scan "directory" --db /path/to/chromatography.db
 chroma --fetch --db /path/to/chromatography.db
+chroma --hash --db /path/to/chromatography.db
 ```

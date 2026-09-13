@@ -16,7 +16,9 @@ for p in (CORE_DIR, SHARED_DIR):
         sys.path.insert(0, p_str)
 
 from scanner import scanDirectory
+from hasher import hashFiles
 from shared.database import Database
+from shared.progress import taskProgress
 
 
 def _default_db_path() -> str:
@@ -35,6 +37,7 @@ def _build_parser() -> argparse.ArgumentParser:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--scan", metavar="PATH", help="Scan a directory and store records in DB")
     group.add_argument("--fetch", action="store_true", help="Fetch all records from DB")
+    group.add_argument("--hash", action="store_true", help="Hash DB records missing sha256")
     parser.add_argument(
         "--db",
         default=_default_db_path(),
@@ -68,19 +71,30 @@ def main(argv: list[str] | None = None) -> int:
 
     database = Database(str(db_path))
     try:
+        if args.hash:
+            entries = database.getFilesWithoutHash()
+            if not entries:
+                print(f"No records missing hash in {db_path}")
+                return 0
+
+            progress = taskProgress()
+            progress.reset(len(entries))
+            hashFiles(entries, progress)
+            database.upsertFile(entries)
+            print(f"Hash completed: {len(entries)} records updated in {db_path}")
+            return 0
+
         entries = sorted(database.getAllFiles(), key=lambda entry: str(entry.filePath))
+        print(f"Fetched {len(entries)} records from {db_path}")
+        for entry in entries:
+            print(
+                f"path={entry.filePath} | ext={entry.extension} | size={entry.size} | "
+                f"createdAt={entry.createdAt.isoformat()} | modifiedAt={entry.modifiedAt.isoformat()} | "
+                f"sha256={entry.sha256}"
+            )
+        return 0
     finally:
         database.close()
-
-    print(f"Fetched {len(entries)} records from {db_path}")
-    for entry in entries:
-        print(
-            f"path={entry.filePath} | ext={entry.extension} | size={entry.size} | "
-            f"createdAt={entry.createdAt.isoformat()} | modifiedAt={entry.modifiedAt.isoformat()} | "
-            f"sha256={entry.sha256}"
-        )
-
-    return 0
 
 
 if __name__ == "__main__":

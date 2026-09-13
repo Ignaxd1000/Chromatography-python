@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 import subprocess
 import sys
+from hashlib import sha256
 from pathlib import Path
 
 
@@ -82,6 +83,76 @@ def test_scan_invalid_path_returns_nonzero_with_message(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert "does not exist or is not a directory" in result.stderr
+
+
+def test_hash_command_updates_missing_hash_records(tmp_path: Path) -> None:
+    data_file = tmp_path / "file.txt"
+    data_file.write_text("hash me", encoding="utf-8")
+    expected_hash = sha256(b"hash me").hexdigest()
+
+    db_path = tmp_path / "seeded.db"
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE files (
+                id INTEGER PRIMARY KEY,
+                filePath TEXT UNIQUE,
+                extension TEXT,
+                size INTEGER,
+                createdAt TEXT,
+                modifiedAt TEXT,
+                sha256 TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            INSERT INTO files (filePath, extension, size, createdAt, modifiedAt, sha256)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (str(data_file), ".txt", 7, "2026-01-01T00:00:00", "2026-01-01T00:00:00", None),
+        )
+        conn.commit()
+
+    result = _run_cli("--hash", "--db", str(db_path))
+    assert result.returncode == 0
+    assert "Hash completed: 1 records updated" in result.stdout
+
+    with sqlite3.connect(db_path) as conn:
+        db_hash = conn.execute(
+            "SELECT sha256 FROM files WHERE filePath = ?", (str(data_file),)
+        ).fetchone()[0]
+    assert db_hash == expected_hash
+
+
+def test_hash_command_with_no_missing_records_prints_message(tmp_path: Path) -> None:
+    db_path = tmp_path / "seeded.db"
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE files (
+                id INTEGER PRIMARY KEY,
+                filePath TEXT UNIQUE,
+                extension TEXT,
+                size INTEGER,
+                createdAt TEXT,
+                modifiedAt TEXT,
+                sha256 TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            INSERT INTO files (filePath, extension, size, createdAt, modifiedAt, sha256)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            ("/tmp/ready.txt", ".txt", 4, "2026-01-01T00:00:00", "2026-01-01T00:00:00", "abc"),
+        )
+        conn.commit()
+
+    result = _run_cli("--hash", "--db", str(db_path))
+    assert result.returncode == 0
+    assert "No records missing hash" in result.stdout
 
 
 def test_invalid_or_missing_args_return_nonzero() -> None:
